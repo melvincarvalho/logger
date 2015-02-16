@@ -49,7 +49,7 @@ function gitterToTurtle(message) {
   turtle += '<http://xmlns.com/foaf/0.1/nick> """'+ message['fromUser']['username'] +'""" ; ';
   turtle += '<http://xmlns.com/foaf/0.1/name> """'+ message['fromUser']['displayName'] +'""" ; ';
   turtle += '<http://www.w3.org/2002/07/owl#sameAs> <https://github.com/'+ message['fromUser']['username'] +'#this>   ; ';
-  turtle += '<http://xmlns.com/foaf/0.1/depiction> <#'+ message['fromUser']['avatarUrlSmall'] +'>   . ';
+  turtle += '<http://xmlns.com/foaf/0.1/depiction> <'+ message['fromUser']['avatarUrlSmall'] +'>   . ';
 
   return turtle;
 }
@@ -100,6 +100,23 @@ var req = https.request(gitter, function(res) {
       });
 
       put.write(turtle);
+      put.end();
+
+      // put meta file
+      ldp.path = "/Public/log/" + roomId + '/' + today + '/,meta';
+      var put = https.request(ldp, function(res) {
+        console.log('STATUS: ' + res.statusCode);
+        console.log('HEADERS: ' + JSON.stringify(res.headers));
+        res.on('data', function (chunk) {
+          console.log('BODY: ' + chunk);
+        });
+      });
+
+      put.on('error', function(e) {
+        console.log('problem with request: ' + e.message);
+      });
+
+      put.write('<> <http://www.w3.org/ns/posix/stat#mtime> "'+ Math.floor(Date.now() / 1000) +'" . ');
       put.end();
 
     }
