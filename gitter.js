@@ -6,6 +6,16 @@ var roomId    = process.env.ROOM_ID;
 var token     = process.env.TOKEN;
 var heartbeat = " \n";
 
+if (!roomId) {
+  console.error('Please set environment variable ROOM_ID');
+  process.exit(-1);
+}
+
+if (!token) {
+  console.error('Please set environment variable TOKEN');
+  process.exit(-1);
+}
+
 console.log('logging room : ' + roomId);
 
 var gitter = {
@@ -17,7 +27,8 @@ var gitter = {
 };
 
 var ldp = {
-  hostname: 'taskify.rww.io',
+  hostname: 'taskify.databox.me',
+  rejectUnauthorized: false,
   port:     443,
   method:   'PUT',
   headers:  {'Content-Type': 'text/turtle'}
@@ -75,7 +86,7 @@ var req = https.request(gitter, function(res) {
       fs.writeFileSync(out, turtle);
 
       // put file to ldp
-      ldp.path = "/log/" + roomId + '/' + today + '/' + message['id'];
+      ldp.path = "/Public/log/" + roomId + '/' + today + '/' + message['id'];
       var put = https.request(ldp, function(res) {
         console.log('STATUS: ' + res.statusCode);
         console.log('HEADERS: ' + JSON.stringify(res.headers));
