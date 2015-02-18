@@ -27,7 +27,7 @@ var gitter = {
 };
 
 var ldp = {
-  hostname: 'taskify.databox.me',
+  hostname: 'gitter.databox.me',
   rejectUnauthorized: false,
   port:     443,
   method:   'PUT',
