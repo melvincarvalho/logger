@@ -1,3 +1,4 @@
+var Gitter = require('node-gitter');
 var https  = require('https');
 var fs     = require('fs');
 var mkdirp = require('mkdirp')
@@ -18,13 +19,8 @@ if (!token) {
 
 console.log('logging room : ' + roomId);
 
-var gitter = {
-  hostname: 'stream.gitter.im',
-  port:     443,
-  path:     '/v1/rooms/' + roomId + '/chatMessages',
-  method:   'GET',
-  headers:  {'Authorization': 'Bearer ' + token}
-};
+var gitter = new Gitter(token);
+
 
 var ldp = {
   hostname: 'gitter.databox.me',
@@ -56,75 +52,81 @@ function gitterToTurtle(message) {
 
 
 
-var req = https.request(gitter, function(res) {
-  res.on('data', function(chunk) {
-    var msg = chunk.toString();
-    if (msg !== heartbeat) {
-      console.log('Message: ' + msg);
-      var message = JSON.parse(msg);
+gitter.rooms.find(roomId).then(function(room) {
 
-      // create dir
-      var today = new Date().toISOString().substring(0,10);
-      var datadir   = './log/';
-      datadir   += roomId + '/';
-      datadir   += today + '/' ;
+  var events = room.streaming().chatMessages();
 
-      console.log('Creating dir: ' + datadir);
-      mkdirp.sync(datadir);
+  // The 'snapshot' event is emitted once, with the last messages in the room
+  events.on('snapshot', function(snapshot) {
+    console.log(snapshot.length + ' messages in the snapshot');
+  });
 
-      // create turtle
-      var turtle  = gitterToTurtle(message);
+  // The 'chatMessages' event is emitted on each new message
+  events.on('chatMessages', function(message) {
+    console.log('A message was ' + message.operation);
+    console.log('Text: ', message.model.text);
 
-      console.log(turtle);
+    var msg = message.model;
 
-      // write file
-      var out = datadir + message['id'] + '.json';
-      console.log('Writing to: ' + out);
-      fs.writeFileSync(out, msg);
-      out = datadir + message['id'];
-      console.log('Writing to: ' + out);
-      fs.writeFileSync(out, turtle);
+    console.log('Message: ' + message.model);
+    message = message.model;
+    //var message = JSON.parse(msg);
 
-      // put file to ldp
-      ldp.path = "/Public/log/" + roomId + '/' + today + '/' + message['id'];
-      var put = https.request(ldp, function(res) {
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
-        res.on('data', function (chunk) {
-          console.log('BODY: ' + chunk);
-        });
+    // create dir
+    var today = new Date().toISOString().substring(0,10);
+    var datadir   = './log/';
+    datadir   += roomId + '/';
+    datadir   += today + '/' ;
+
+    console.log('Creating dir: ' + datadir);
+    mkdirp.sync(datadir);
+
+    // create turtle
+    var turtle  = gitterToTurtle(message);
+
+    console.log(turtle);
+
+    // write file
+    var out = datadir + message['id'] + '.json';
+    console.log('Writing to: ' + out);
+    fs.writeFileSync(out, msg);
+    out = datadir + message['id'];
+    console.log('Writing to: ' + out);
+    fs.writeFileSync(out, turtle);
+
+    // put file to ldp
+    ldp.path = "/Public/log/" + roomId + '/' + today + '/' + message['id'];
+    var put = https.request(ldp, function(res) {
+      console.log('STATUS: ' + res.statusCode);
+      console.log('HEADERS: ' + JSON.stringify(res.headers));
+      res.on('data', function (chunk) {
+        console.log('BODY: ' + chunk);
       });
+    });
 
-      put.on('error', function(e) {
-        console.log('problem with request: ' + e.message);
+    put.on('error', function(e) {
+      console.log('problem with request: ' + e.message);
+    });
+
+    put.write(turtle);
+    put.end();
+
+    // put meta file
+    ldp.path = "/Public/log/" + roomId + '/' + today + '/,meta';
+    var put = https.request(ldp, function(res) {
+      console.log('STATUS: ' + res.statusCode);
+      console.log('HEADERS: ' + JSON.stringify(res.headers));
+      res.on('data', function (chunk) {
+        console.log('BODY: ' + chunk);
       });
+    });
 
-      put.write(turtle);
-      put.end();
+    put.on('error', function(e) {
+      console.log('problem with request: ' + e.message);
+    });
 
-      // put meta file
-      ldp.path = "/Public/log/" + roomId + '/' + today + '/,meta';
-      var put = https.request(ldp, function(res) {
-        console.log('STATUS: ' + res.statusCode);
-        console.log('HEADERS: ' + JSON.stringify(res.headers));
-        res.on('data', function (chunk) {
-          console.log('BODY: ' + chunk);
-        });
-      });
+    put.write('<> <http://www.w3.org/ns/posix/stat#mtime> "'+ Math.floor(Date.now() / 1000) +'" . ');
+    put.end();
 
-      put.on('error', function(e) {
-        console.log('problem with request: ' + e.message);
-      });
-
-      put.write('<> <http://www.w3.org/ns/posix/stat#mtime> "'+ Math.floor(Date.now() / 1000) +'" . ');
-      put.end();
-
-    }
   });
 });
-
-req.on('error', function(e) {
-  console.log('Something went wrong: ' + e.message);
-});
-
-req.end();
