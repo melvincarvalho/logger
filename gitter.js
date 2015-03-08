@@ -68,7 +68,7 @@ gitter.rooms.find(roomId).then(function(room) {
 
     var msg = message.model;
 
-    console.log('Message: ' + message.model);
+    console.log(message.model);
     message = message.model;
     //var message = JSON.parse(msg);
 
