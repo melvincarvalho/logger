@@ -35,7 +35,7 @@ if (!host) {
 
 
 // gitter
-var gitter        = new Gitter(token);
+var gitter = new Gitter(token);
 
 
 // main

@@ -1,3 +1,10 @@
+/**
+ * @fileOverview Functions for gitter API operations
+ * @author <a href="http://melvincarvalho.com/#me">Melvin Carvalho</a>
+ */
+
+
+// requires
 var debug  = require('debug')('gitter');
 var fs     = require('fs');
 var https  = require('https');
@@ -40,7 +47,7 @@ function flushQueue(callback) {
     }(i));
   }
   if (callback) {
-    callback(null);    
+    callback(null);
   }
 }
 
