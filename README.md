@@ -28,6 +28,6 @@ Export environement vaiables before running
 
 run once to set up the history
 
-    `nodejs logger.js`
+    `nodejs gitter.js`
 
 run logger in realtime
