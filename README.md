@@ -6,24 +6,28 @@
 
 1. Firstly you will need a gitter API access token available from: https://developer.gitter.im/apps
 
-    export TOKEN=<token>
+    `export TOKEN=<token>`
 
 2. Secondly you will need some storage space e.g available from : https://linkeddata.github.io/signup/?tab=signup
 
-    export DOMAIN=<domain> (e.g. foo.databox.me)
+    `export DOMAIN=<domain> (e.g. foo.databox.me)`
 
 3. You will need the gitter room ID (use inspect element .data-id)
 
-    export ROOM_ID=<room_id>  
+    `export ROOM_ID=<room_id>`
 
-Export the three environement vaiables before running
+Export environement vaiables before running
+
+4. Optional debugging
+
+    `export DEBUG=gitter`
 
 ## Running
 
-   nodejs history.js
+    `nodejs history.js`
 
 run once to set up the history
 
-   nodejs logger.js
+    `nodejs logger.js`
 
 run logger in realtime
