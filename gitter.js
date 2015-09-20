@@ -27,7 +27,11 @@ if (!token) {
 }
 
 if (!roomId) {
-  roomId = defaultRoomId;
+  if (process.argv[2]) {
+    roomId = process.argv[2];
+  } else {
+    roomId = defaultRoomId;
+  }
 }
 
 if (!host) {

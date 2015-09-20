@@ -28,6 +28,6 @@ Export environement vaiables before running
 
 run once to set up the history
 
-    `nodejs gitter.js`
+    `nodejs gitter.js [roomId]`
 
-run logger in realtime
+run logger in realtime, if ROOM_ID was not set it can be supplied as an argument
