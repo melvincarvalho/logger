@@ -22,7 +22,7 @@ var roomId = process.env.ROOM_ID;
 var token  = process.env.TOKEN;
 var host   = process.env.HOST;
 if (!token) {
-  console.err('TOKEN environment variable is required');
+  console.error('TOKEN environment variable is required');
   process.exit(-1);
 }
 
