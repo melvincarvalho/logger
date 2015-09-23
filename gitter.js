@@ -38,6 +38,10 @@ if (!host) {
   host = defaultHost;
 }
 
+if (process.env.DATA_DIR) {
+  dataDir = process.env.DATA_DIR;
+}
+
 
 // gitter
 var gitter = new Gitter(token);

@@ -20,6 +20,9 @@ var defaultRoomId = '53fb5b57163965c9bc200404';
 var roomId = process.env.ROOM_ID;
 var token  = process.env.TOKEN;
 var host   = process.env.HOST;
+if (process.env.DATA_DIR) {
+  dataDir = process.env.DATA_DIR;
+}
 if (!token) {
   console.err('TOKEN environment variable is required');
   process.exit(-1);
@@ -39,6 +42,6 @@ var gitter = new Gitter(token);
 
 
 // main
-func.getGitterPosts(null, roomId, host, gitter, function() {
+func.getGitterPosts(null, roomId, host, gitter, dataDir, function() {
   console.log('messages feteched');
 });

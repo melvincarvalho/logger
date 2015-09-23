@@ -12,7 +12,6 @@ var mkdirp = require('mkdirp');
 var Gitter = require('node-gitter');
 var util   = require('util');
 
-var dataDir       = './data';
 var queue         = [];
 
 
@@ -126,9 +125,10 @@ function postsCallback(err, length, beforeId, roomId, host, gitter, callback) {
  * @param  {String}   roomId The id of the foom
  * @param  {String}   host This remote storage host
  * @param  {Function} gitter Gitter API object
+ * @param  {String}   dataDir The data directory to log to
  * @param  {Function} callback Callback with error, number of posts and first ID
  */
-function getGitterPosts(beforeId, roomId, host, gitter, callback) {
+function getGitterPosts(beforeId, roomId, host, gitter, dataDir, callback) {
   limit = 50;
   debug('Getting ' + limit + ' messages from room : ' + roomId);
 
