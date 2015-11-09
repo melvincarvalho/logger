@@ -22,6 +22,10 @@ Export environement vaiables before running
 
     `export DEBUG=gitter`
 
+5. Optional certificate for access control
+
+    `export CERT=<path>`
+
 ## Running
 
     `nodejs history.js`

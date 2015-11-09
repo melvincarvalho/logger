@@ -29,12 +29,19 @@ if (!token) {
 }
 
 if (!roomId) {
-  roomId = defaultRoomId;
+  if (process.argv[2]) {
+    roomId = process.argv[2];
+  } else {
+    roomId = defaultRoomId;
+  }
 }
+
 
 if (!host) {
   host = defaultHost;
 }
+
+var cert = process.env.CERT;
 
 
 // gitter
@@ -42,6 +49,6 @@ var gitter = new Gitter(token);
 
 
 // main
-func.getGitterPosts(null, roomId, host, gitter, dataDir, function() {
+func.getGitterPosts(null, roomId, host, gitter, dataDir, cert, function() {
   console.log('messages feteched');
 });

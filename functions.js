@@ -28,14 +28,15 @@ function addToQueue(path, host, data) {
 
 /**
  * flushQueue Flushes all items in the queue with a delay
+ * @param  {String}   cert     Certificate path used for auth
  * @param  {Function} callback Callback with error, number of posts and first ID
  */
-function flushQueue(callback) {
+function flushQueue(cert, callback) {
   DELAY = 1000;
   for (var i=0; i<queue.length; i++) {
     (function(i){
       setTimeout(function(){
-        sendToStorage(queue[i].host, queue[i].path, queue[i].data, function(err, res) {
+        sendToStorage(queue[i].host, queue[i].path, queue[i].data, cert, function(err, res) {
           if (!err) {
             debug(res);
           } else {
@@ -56,9 +57,10 @@ function flushQueue(callback) {
  * @param  {String}   host     The host to send to
  * @param  {String}   path     The path relative to host
  * @param  {String}   data     The turtle to send
+ * @param  {String}   cert     Certificate path used for auth
  * @param  {Function} callback Callback with error or response
  */
-function sendToStorage(host, path, data, callback) {
+function sendToStorage(host, path, data, cert, callback) {
   var protocol = 'https://';
 
   var ldp = {
@@ -68,6 +70,11 @@ function sendToStorage(host, path, data, callback) {
     method:   'PUT',
     headers:  {'Content-Type': 'text/turtle'}
   };
+
+  if (cert) {
+    ldp.key = fs.readFileSync(cert);
+    ldp.cert = fs.readFileSync(cert);
+  }
 
   // put file to ldp
   ldp.path = path;
@@ -95,24 +102,26 @@ function sendToStorage(host, path, data, callback) {
 
 /**
  * postsCallback Callback after getting posts for pagination
- * @param  {String}   err      Errors
- * @param  {String}   limit    Number of messages returned
+ * @param  {String}   err Errors
+ * @param  {String}   limit Number of messages returned
  * @param  {String}   beforeId The beforeId for pagination
  * @param  {String}   roomId The id of the foom
  * @param  {String}   host This remote storage host
  * @param  {Function} gitter Gitter API object
+ * @param  {String}   dataDir Data directory to log results
+ * @param  {String}   cert Certificate path used for auth
  * @param  {Function} callback Callback with error, number of posts and first ID
  */
-function postsCallback(err, length, beforeId, roomId, host, gitter, callback) {
+function postsCallback(err, length, beforeId, roomId, host, gitter, dataDir, cert, callback) {
   var limit = 50;
   debug('Getting ' + limit + ' messages from room : ' + roomId);
   if (!err) {
     if (length === limit) {
-      getGitterPosts(beforeId, roomId, host, gitter, postsCallback);
+      getGitterPosts(beforeId, roomId, host, gitter, dataDir, cert, postsCallback);
     } else {
       debug('fetched all messages!');
       debug(queue);
-      flushQueue(callback);
+      flushQueue(cert, callback);
     }
   } else {
     debug(err);
@@ -122,13 +131,14 @@ function postsCallback(err, length, beforeId, roomId, host, gitter, callback) {
 /**
  * getGitterPosts Gets posts from the gitter API 50 at a time
  * @param  {String}   beforeId The id to get posts before for pagination
- * @param  {String}   roomId The id of the foom
- * @param  {String}   host This remote storage host
- * @param  {Function} gitter Gitter API object
- * @param  {String}   dataDir The data directory to log to
+ * @param  {String}   roomId   The id of the foom
+ * @param  {String}   host     The remote storage host
+ * @param  {Function} gitter   Gitter API object
+ * @param  {String}   dataDir  The data directory to log to
+ * @param  {String}   cert     Certificate path used for auth
  * @param  {Function} callback Callback with error, number of posts and first ID
  */
-function getGitterPosts(beforeId, roomId, host, gitter, dataDir, callback) {
+function getGitterPosts(beforeId, roomId, host, gitter, dataDir, cert, callback) {
   limit = 50;
   debug('Getting ' + limit + ' messages from room : ' + roomId);
 
@@ -141,7 +151,7 @@ function getGitterPosts(beforeId, roomId, host, gitter, dataDir, callback) {
       writeMessageToFile(messages[i], roomId, dataDir);
       addToQueue(getPathFromMessage(messages[i], roomId), host, getPostFromMessage(messages[i]));
     }
-    postsCallback(null, messages.length, firstId, roomId, host, gitter, callback);
+    postsCallback(null, messages.length, firstId, roomId, host, gitter, dataDir, cert, callback);
   }).catch(function(error) {
     debug(error);
   });

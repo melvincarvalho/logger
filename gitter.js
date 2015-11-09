@@ -42,6 +42,8 @@ if (process.env.DATA_DIR) {
   dataDir = process.env.DATA_DIR;
 }
 
+var cert = process.env.CERT;
+
 
 // gitter
 var gitter = new Gitter(token);
@@ -76,7 +78,7 @@ gitter.rooms.find(roomId).then(function(room) {
     // write file
     func.writeMessageToFile(message, roomId, dataDir);
 
-    func.sendToStorage(host, func.getPathFromMessage(message, roomId), turtle, function(err, res){
+    func.sendToStorage(host, func.getPathFromMessage(message, roomId), turtle, cert, function(err, res){
       if (!err) {
         debug(res);
       } else {
