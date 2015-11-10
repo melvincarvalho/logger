@@ -13,6 +13,7 @@ var Gitter = require('node-gitter');
 var util   = require('util');
 
 var queue         = [];
+var finished      = false;
 
 
 /**
@@ -105,6 +106,7 @@ function sendToStorage(host, path, data, cert, callback) {
  * @param  {String}   err Errors
  * @param  {String}   limit Number of messages returned
  * @param  {String}   beforeId The beforeId for pagination
+ * @param  {String}   notBeforeId The id not to get posts before
  * @param  {String}   roomId The id of the foom
  * @param  {String}   host This remote storage host
  * @param  {Function} gitter Gitter API object
@@ -112,12 +114,12 @@ function sendToStorage(host, path, data, cert, callback) {
  * @param  {String}   cert Certificate path used for auth
  * @param  {Function} callback Callback with error, number of posts and first ID
  */
-function postsCallback(err, length, beforeId, roomId, host, gitter, dataDir, cert, callback) {
+function postsCallback(err, length, beforeId, notBeforeId, roomId, host, gitter, dataDir, cert, callback) {
   var limit = 50;
   debug('Getting ' + limit + ' messages from room : ' + roomId);
   if (!err) {
     if (length === limit) {
-      getGitterPosts(beforeId, roomId, host, gitter, dataDir, cert, postsCallback);
+      getGitterPosts(beforeId, notBeforeId, roomId, host, gitter, dataDir, cert, postsCallback);
     } else {
       debug('fetched all messages!');
       debug(queue);
@@ -130,15 +132,16 @@ function postsCallback(err, length, beforeId, roomId, host, gitter, dataDir, cer
 
 /**
  * getGitterPosts Gets posts from the gitter API 50 at a time
- * @param  {String}   beforeId The id to get posts before for pagination
- * @param  {String}   roomId   The id of the foom
- * @param  {String}   host     The remote storage host
- * @param  {Function} gitter   Gitter API object
- * @param  {String}   dataDir  The data directory to log to
- * @param  {String}   cert     Certificate path used for auth
- * @param  {Function} callback Callback with error, number of posts and first ID
+ * @param  {String}   beforeId    The id to get posts before for pagination
+ * @param  {String}   notBeforeId The id not to get posts before
+ * @param  {String}   roomId      The id of the foom
+ * @param  {String}   host        The remote storage host
+ * @param  {Function} gitter      Gitter API object
+ * @param  {String}   dataDir     The data directory to log to
+ * @param  {String}   cert        Certificate path used for auth
+ * @param  {Function} callback    Callback with error, number of posts and first ID
  */
-function getGitterPosts(beforeId, roomId, host, gitter, dataDir, cert, callback) {
+function getGitterPosts(beforeId, notBeforeId, roomId, host, gitter, dataDir, cert, callback) {
   limit = 50;
   debug('Getting ' + limit + ' messages from room : ' + roomId);
 
@@ -146,12 +149,25 @@ function getGitterPosts(beforeId, roomId, host, gitter, dataDir, cert, callback)
     return room.chatMessages({'beforeId' : beforeId, 'limit' : limit});
   }).then(function(messages) {
     debug('found ' + messages.length + ' messages');
-    if (messages.length>0) firstId = messages[0].id;
-    for (var i=0; i<messages.length; i++) {
-      writeMessageToFile(messages[i], roomId, dataDir);
-      addToQueue(getPathFromMessage(messages[i], roomId), host, getPostFromMessage(messages[i]));
+    if (messages.length>0) {
+      firstId = messages[0].id;
     }
-    postsCallback(null, messages.length, firstId, roomId, host, gitter, dataDir, cert, callback);
+    for (var i=messages.length-1; i>=0; i--) {
+      if (notBeforeId) {
+        if (messages[i].id == notBeforeId) {
+          finished = true;
+        }
+      }
+      if (!finished) {
+        writeMessageToFile(messages[i], roomId, dataDir);
+        addToQueue(getPathFromMessage(messages[i], roomId), host, getPostFromMessage(messages[i]));
+      }
+    }
+    if (!finished) {
+      postsCallback(null, messages.length, firstId, notBeforeId, roomId, host, gitter, dataDir, cert, callback);
+    } else {
+      flushQueue(cert, callback);
+    }
   }).catch(function(error) {
     debug(error);
   });

@@ -14,6 +14,7 @@ var func   = require('./functions.js');
 var dataDir       = './data';
 var defaultHost   = 'gitter.databox.me';
 var defaultRoomId = '53fb5b57163965c9bc200404';
+var notBeforeId;
 
 
 // env variables
@@ -36,6 +37,10 @@ if (!roomId) {
   }
 }
 
+if (process.argv[3]) {
+  notBeforeId = process.argv[3];
+}
+
 
 if (!host) {
   host = defaultHost;
@@ -49,6 +54,6 @@ var gitter = new Gitter(token);
 
 
 // main
-func.getGitterPosts(null, roomId, host, gitter, dataDir, cert, function() {
-  console.log('messages feteched');
+func.getGitterPosts(null, notBeforeId, roomId, host, gitter, dataDir, cert, function() {
+  console.log('messages fetched');
 });
