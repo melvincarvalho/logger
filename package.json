@@ -1,0 +1,27 @@
+{
+  "name": "gitter-logger",
+  "version": "0.0.1",
+  "description": "Logger for gitter",
+  "main": "functions.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/melvincarvalho/logger.git"
+  },
+  "keywords": [
+    "gitter",
+    "logger"
+  ],
+  "author": "Melvin Carvalho <melvincarvalho@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/melvincarvalho/logger/issues"
+  },
+  "homepage": "https://github.com/melvincarvalho/logger#readme",
+  "dependencies": {
+    "mkdirp": "^0.5.1",
+    "node-gitter": "^1.2.9"
+  }
+}

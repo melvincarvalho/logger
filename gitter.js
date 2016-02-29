@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 /**
  * @fileOverview Gets gitter history and sends it to remote storage and locally.
  *   requires TOKEN environment veriable obtainable from
