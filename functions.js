@@ -33,7 +33,7 @@ function addToQueue(path, host, data) {
  * @param  {Function} callback Callback with error, number of posts and first ID
  */
 function flushQueue(cert, callback) {
-  DELAY = 1000;
+  DELAY = 500;
   for (var i=0; i<queue.length; i++) {
     (function(i){
       setTimeout(function(){
@@ -126,7 +126,9 @@ function postsCallback(err, length, beforeId, notBeforeId, roomId, host, gitter,
       flushQueue(cert, callback);
     }
   } else {
+    debug('Possibly too many requests.  TODO: fix.');
     debug(err);
+    callback(err);
   }
 }
 

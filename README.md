@@ -28,10 +28,10 @@ Export environement vaiables before running
 
 ## Running
 
-    `nodejs history.js`
+    nodejs history.js [roomId] [lastMessage]
 
-run once to set up the history
+run once to set up the history, lastMessage will only save messages up to that Id
 
-    `nodejs gitter.js [roomId]`
+    nodejs gitter.js [roomId]
 
 run logger in realtime, if ROOM_ID was not set it can be supplied as an argument
