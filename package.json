@@ -1,6 +1,6 @@
 {
   "name": "gitter-logger",
-  "version": "0.0.2",
+  "version": "0.0.4",
   "description": "Logger for gitter",
   "main": "functions.js",
   "scripts": {
@@ -22,6 +22,7 @@
   "homepage": "https://github.com/melvincarvalho/logger#readme",
   "dependencies": {
     "mkdirp": "^0.5.1",
-    "node-gitter": "^1.2.9"
+    "node-gitter": "^1.2.9",
+    "nomnom": "^1.8.1"
   }
 }
