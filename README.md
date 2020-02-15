@@ -1,7 +1,5 @@
 # logger
 
-[![Join the chat at https://gitter.im/melvincarvalho/logger](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/melvincarvalho/logger?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 ## Setup
 
 1. Firstly you will need a gitter API access token available from: https://developer.gitter.im/apps
